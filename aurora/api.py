@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from google.adk.runners import Runner
-from google.adk.sessions import SqliteSessionService
+from google.adk.sessions.sqlite_session_service import SqliteSessionService
 from google.genai import types
 from pydantic import BaseModel
 
