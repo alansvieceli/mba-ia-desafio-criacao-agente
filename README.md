@@ -27,7 +27,9 @@ Escolhi transferência (`sub_agents`) em vez de `AgentTool` porque a confirmaç�
 
 Armazenamento: SQLite em `estado/` (ignorado pelo Git). `condominio.db` guarda reservas e visitantes; `sessoes.db` guarda as sessões do ADK (`SqliteSessionService`). Os dois usam WAL. Se `condominio.db` não existe, ele é criado a partir de `dados/`.
 
-Modelo: `gemini-2.5-flash` para todos os agentes, ou o que estiver em `AURORA_MODELO`.
+Modelos: o principal usa `gemini-3.1-flash-lite` e os especialistas `gemini-3.5-flash-lite`. A cota gratuita do Gemini é contada por modelo e por minuto (nos modelos Flash comuns era de 5 por minuto e 20 por dia, pouco para o fluxo do avaliador; nos Flash-Lite, 15 por minuto e 500 por dia). Separar os agentes em dois modelos dá a cada grupo a sua própria cota, e um `429` é repetido com espera crescente (`REPETIR` em [aurora/agentes.py](aurora/agentes.py)). Os modelos são trocáveis pelo `.env`.
+
+Os especialistas recebem na instrução o pedido atual do morador (`com_pedido_atual` em [aurora/agentes.py](aurora/agentes.py)). Depois de uma transferência, o histórico termina em citações do agente principal, e modelos menores passavam a responder uma pergunta antiga da conversa.
 
 ## Garantias
 
@@ -60,7 +62,8 @@ uv run uvicorn aurora.api:api --port 8000
 Variáveis do `.env`:
 
 - `GOOGLE_API_KEY`: chave do Google AI Studio (obrigatória).
-- `AURORA_MODELO`: modelo Gemini dos agentes (opcional; padrão `gemini-2.5-flash`).
+- `AURORA_MODELO_PRINCIPAL`: modelo do agente principal (opcional; padrão `gemini-3.1-flash-lite`).
+- `AURORA_MODELO_ESPECIALISTAS`: modelo dos especialistas (opcional; padrão `gemini-3.5-flash-lite`).
 
 O comando de restauração deve rodar com a API parada. Ele recria `estado/condominio.db` a partir de `dados/` e também apaga `estado/sessoes.db`. Para reiniciar a API sem perder nada, pare com Ctrl+C e rode de novo o comando de subida, sem restaurar.
 
