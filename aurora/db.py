@@ -73,7 +73,8 @@ def iniciar():
 
 def restaurar():
     """Volta reservas e visitantes ao estado de dados/ e apaga as sessões."""
-    for base in (BANCO, BANCO_SESSOES):
+    # sessões primeiro: é o arquivo que a API em execução mantém aberto, então falha antes de mexer nos dados
+    for base in (BANCO_SESSOES, BANCO):
         for sufixo in ("", "-wal", "-shm"):
             Path(str(base) + sufixo).unlink(missing_ok=True)
     iniciar()
